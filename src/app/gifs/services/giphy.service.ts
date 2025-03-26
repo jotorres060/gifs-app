@@ -18,9 +18,9 @@ function loadGifsFromLocalStorage() {
 export class GiphyService {
   private env = environment;
   private http = inject(HttpClient);
+  private GIFS_LOCAL_STORAGE_KEY = 'gifs';
   private searchHistory = signal<Record<string, Gif[]>>(loadGifsFromLocalStorage());
   private searchHistoryKeys = computed(() => Object.keys(this.searchHistory()));
-  private GIFS_LOCAL_STORAGE_KEY = 'gifs';
 
   constructor() {
     this.loadTrendingGifs();
@@ -31,11 +31,12 @@ export class GiphyService {
     localStorage.setItem(this.GIFS_LOCAL_STORAGE_KEY, historyString);
   });
 
-  public loadTrendingGifs(): Observable<Gif[]> {
+  public loadTrendingGifs(offset: number = 0): Observable<Gif[]> {
     return this.http.get<any>(`${ this.env.giphyApiUrl }/gifs/trending`, {
       params: {
         api_key: this.env.giphyApiKey,
-        limit: 20
+        limit: 20,
+        offset: (offset * 20)
       }
     })
     .pipe(
